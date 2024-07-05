@@ -52,11 +52,11 @@ class Game:
 
     def moveVertical(self, direction):
         """1 for up, -1 for down"""
-        loop_range = range(4) if direction == 1 else reversed(range(4))
         # Do column first to go down the column
         for c in range(4):
             prev_empty = []
             last_value = None
+            loop_range = range(4) if direction == 1 else reversed(range(4))
             for r in loop_range:
                 if self._board[r][c] == 0:
                     prev_empty.append((r, c))
@@ -69,10 +69,12 @@ class Game:
 
                 last_value = (r, c)
 
+
                 if len(prev_empty) == 0:
                     continue 
 
                 empty_cell = prev_empty.pop(0)
+
                 self._board[empty_cell[0]][empty_cell[1]] = self._board[r][c]
                 last_value = empty_cell
                 self._board[r][c] = 0
@@ -80,11 +82,11 @@ class Game:
 
     def moveHorizontal(self, direction):
         """1 for left, -1 for right"""
-        loop_range = range(4) if direction == 1 else reversed(range(4))
         # Do column first to go down the column
         for r in range(4):
             prev_empty = []
             last_value = None
+            loop_range = range(4) if direction == 1 else reversed(range(4))
             for c in loop_range:
                 if self._board[r][c] == 0:
                     prev_empty.append((r, c))
@@ -110,6 +112,8 @@ class Game:
     def board(self):
         """Returns the current state of the board."""
         return self._board
+
+    
 
     def get_occupied_cells(self):
         """Returns a list of occupied cells as tuples"""
