@@ -113,7 +113,39 @@ class Game:
         """Returns the current state of the board."""
         return self._board
 
-    
+    def check_loss(self) -> bool:
+        """Returns True if there's no moves to be made, False otherwise."""
+        for i in range(4):
+            for j in range(4):
+                left = (i, j-1)
+                right = (i, j+1)
+                up = (i-1, j)
+                down = (i+1, j)
+
+                if self._in_bounds(left):
+                    if self._board[i][j] == self._board[left[0]][left[1]]:
+                        return False
+                if self._in_bounds(right):
+                    if self._board[i][j] == self._board[right[0]][right[1]]:
+                        return False
+                if self._in_bounds(left):
+                    if self._board[i][j] == self._board[up[0]][up[1]]:
+                        return False
+                if self._in_bounds(left):
+                    if self._board[i][j] == self._board[down[0]][down[1]]:
+                        return False
+        return True
+
+    def _in_bounds(self, r, c):
+        return r < 0 or c < 0 or r > 3 or c > 0
+
+    def check_win(self) -> bool:
+        """Returns True if there's a 2048 value in the board, False otherwise."""
+        for i in range(4):
+            for j in range(4):
+                if self._board[i][j] == 2048:
+                    return True
+        return False
 
     def get_occupied_cells(self):
         """Returns a list of occupied cells as tuples"""
