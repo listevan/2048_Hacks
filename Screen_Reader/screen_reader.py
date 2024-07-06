@@ -27,7 +27,7 @@ class Screen_Reader:
     wall_color = (187, 172, 159)
     number_color = (118, 109, 101)
 
-    def __init__ (self, dir = None):
+    def __init__(self, dir = None):
         if dir:
             self.image = np.asarray(Image.open(dir), dtype=np.int32)[:, :, :3]
         else:
@@ -67,7 +67,7 @@ class Screen_Reader:
         self.h_step = int(self.height / 4)
         self.arr = np.zeros((4, 4))
     
-    def getArray (self, display = False):
+    def getArray(self, display = False):
         if display:
             plt.figure()
         for ii in range(4):
@@ -101,7 +101,7 @@ class Screen_Reader:
 
         return self.arr
 
-    def update (self, dir = None):
+    def update(self, dir = None):
         if dir:
             self.image = np.asarray(Image.open(dir), dtype=np.int32)[:, :, :3]
         else:
