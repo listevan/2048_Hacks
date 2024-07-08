@@ -19,12 +19,14 @@ class Game:
     def gen_values(self):
         """Generates one value"""
         emptys = self.get_empty_cells()
+        if (not len(emptys)):
+            return
         chosen = np.random.choice(emptys, size=1, replace=False)
         i1 = chosen[0] // 4
         j1 = chosen[0] % 4
         # i2 = chosen[1] // 4
         # j2 = chosen[1] % 4
-        print("gen'd at", i1, j1)
+        # print("gen'd at", i1, j1)
         self._board[i1][j1] = np.random.choice([2, 4], size=1)[0]
         # self._board[i2][j2] = np.random.choice([2, 4], size=1)[0]
 
@@ -46,7 +48,7 @@ class Game:
             self.moveHorizontal(1)
 
 
-        self.display()
+        # self.display()
         
         self.gen_values()
 
@@ -122,22 +124,22 @@ class Game:
                 up = (i-1, j)
                 down = (i+1, j)
 
-                if self._in_bounds(left):
+                if self._in_bounds(*left):
                     if self._board[i][j] == self._board[left[0]][left[1]]:
                         return False
-                if self._in_bounds(right):
+                if self._in_bounds(*right):
                     if self._board[i][j] == self._board[right[0]][right[1]]:
                         return False
-                if self._in_bounds(left):
+                if self._in_bounds(*up):
                     if self._board[i][j] == self._board[up[0]][up[1]]:
                         return False
-                if self._in_bounds(left):
+                if self._in_bounds(*down):
                     if self._board[i][j] == self._board[down[0]][down[1]]:
                         return False
         return True
 
     def _in_bounds(self, r, c):
-        return r < 0 or c < 0 or r > 3 or c > 0
+        return (r >= 0 and c >= 0) and (r <= 3 and c <= 3)
 
     def check_win(self) -> bool:
         """Returns True if there's a 2048 value in the board, False otherwise."""
