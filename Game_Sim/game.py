@@ -38,6 +38,7 @@ class Game:
             3: left
         """
         # do movement, generate value
+        prev_board = self.board.copy()
         if direction == 0:
             self.moveVertical(1) 
         elif direction == 1:
@@ -50,7 +51,10 @@ class Game:
 
         # self.display()
         
-        self.gen_values()
+        if prev_board != self.board:
+            self.gen_values()
+            return True
+        return False
 
     def moveVertical(self, direction):
         """1 for up, -1 for down"""
