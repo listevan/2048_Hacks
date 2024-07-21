@@ -15,10 +15,15 @@ def test_model(filename):
     new_game = game.Game()
     while (not new_game.check_loss() and not new_game.check_win()):
         new_game.display()
-        action = model(torch.tensor(new_game.board.flatten(), dtype=torch.float32))
+        action = torch.argmax(model(torch.tensor(new_game.board.flatten(), dtype=torch.float32)))
         
         new_game.move(action)
         next = input()
         if next == "close":
             break
+
+
+if __name__ == "__main__":
+    args = sys.argv
+    test_model(args[1])
 

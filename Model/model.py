@@ -22,4 +22,5 @@ class DQN(nn.Module):
         x = F.relu(self.layer5(x))
         x = F.relu(self.layer6(x))
         x = F.relu(self.layer7(x))
-        return torch.argmax(self.layer8(x))
+        x = self.layer8(x)
+        return x
