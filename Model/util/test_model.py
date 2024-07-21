@@ -16,7 +16,7 @@ def test_model(filename):
     while (not new_game.check_loss() and not new_game.check_win()):
         new_game.display()
         action = torch.argmax(model(torch.tensor(new_game.board.flatten(), dtype=torch.float32)))
-        
+        print(action)
         new_game.move(action)
         next = input()
         if next == "close":
