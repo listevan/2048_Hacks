@@ -5,7 +5,7 @@ import sys
 sys.path.append("..") 
 from model import DQN
 
-sys.path.append("..")
+sys.path.append("../..")
 from Game_Sim import game
 
 def test_model(filename):
