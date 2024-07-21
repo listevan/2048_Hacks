@@ -38,20 +38,20 @@ class Game:
             3: left
         """
         # do movement, generate value
+        succesful = False
         prev_board = self.board.copy()
         if direction == 0:
-            self.moveVertical(1) 
+            succesful = self.moveVertical(1) 
         elif direction == 1:
-            self.moveVertical(-1)
+            succesful = self.moveVertical(-1)
         elif direction == 2:
-            self.moveHorizontal(-1)
+            succesful = self.moveHorizontal(-1)
         elif direction == 3:
-            self.moveHorizontal(1)
-
+            succesful = self.moveHorizontal(1)
 
         # self.display()
         
-        if prev_board != self.board:
+        if succesful:
             self.gen_values()
             return True
         return False
@@ -59,6 +59,7 @@ class Game:
     def moveVertical(self, direction):
         """1 for up, -1 for down"""
         # Do column first to go down the column
+        success = False
         for c in range(4):
             prev_empty = []
             last_value = None
@@ -78,17 +79,20 @@ class Game:
 
                 if len(prev_empty) == 0:
                     continue 
-
+                
+                success = True
                 empty_cell = prev_empty.pop(0)
 
                 self._board[empty_cell[0]][empty_cell[1]] = self._board[r][c]
                 last_value = empty_cell
                 self._board[r][c] = 0
                 prev_empty.append((r, c))
+        return success
 
     def moveHorizontal(self, direction):
         """1 for left, -1 for right"""
         # Do column first to go down the column
+        success = False
         for r in range(4):
             prev_empty = []
             last_value = None
@@ -107,12 +111,14 @@ class Game:
 
                 if len(prev_empty) == 0:
                     continue 
-
+                
+                success = True
                 empty_cell = prev_empty.pop(0)
                 self._board[empty_cell[0]][empty_cell[1]] = self._board[r][c]
                 last_value = empty_cell
                 self._board[r][c] = 0
                 prev_empty.append((r, c))
+        return True
 
     @property
     def board(self):
