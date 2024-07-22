@@ -118,7 +118,7 @@ class Game:
                 last_value = empty_cell
                 self._board[r][c] = 0
                 prev_empty.append((r, c))
-        return True
+        return success
 
     @property
     def board(self):
