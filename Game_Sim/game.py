@@ -37,6 +37,8 @@ class Game:
             2: right
             3: left
         """
+        backup = self._board.copy()
+
         # do movement, generate value
         succesful = False
         prev_board = self.board.copy()
@@ -129,6 +131,10 @@ class Game:
         """Returns True if there's no moves to be made, False otherwise."""
         for i in range(4):
             for j in range(4):
+                # if there is empty space it is fine
+                if self._board[i][j] == 0:
+                    return False
+
                 left = (i, j-1)
                 right = (i, j+1)
                 up = (i-1, j)

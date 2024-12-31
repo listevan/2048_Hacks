@@ -2,6 +2,7 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
+# maybe try a CNN instead
 class DQN(nn.Module):
     def __init__(self):
         super(DQN, self).__init__()
