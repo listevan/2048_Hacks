@@ -22,10 +22,10 @@ class DQN(nn.Module):
         )
 
         self.fc = nn.Linear(10, 4)
-        self.softmax = nn.Softmax(0)
+        # self.softmax = nn.Softmax(0)
 
     def forward(self, x):
         x = self.model(x).squeeze()
         x = self.fc(x)
-        x = self.softmax(x)
-        return torch.argmax(x) 
+        # x = self.softmax(x)
+        return x

@@ -37,7 +37,6 @@ class Game:
             2: right
             3: left
         """
-        backup = self._board.copy()
 
         # do movement, generate value
         succesful = False
@@ -50,6 +49,8 @@ class Game:
             succesful = self.moveHorizontal(-1)
         elif direction == 3:
             succesful = self.moveHorizontal(1)
+        else:
+            raise Exception("invalid input")
 
         # self.display()
         

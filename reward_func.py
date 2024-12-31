@@ -113,5 +113,8 @@ def get_reward(prev, next, terminated, truncated):
                 # if can now be combined
                 if next_check[1]:
                     reward += next[i][j]
-    return reward
+    if not reward:
+        return -4
+    else:
+        return reward
 
