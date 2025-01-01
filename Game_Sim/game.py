@@ -12,6 +12,9 @@ class Game:
         self._board = np.zeros([4, 4])
         self.gen_values()
         self.gen_values()
+    
+    def from_board(self, board):
+        self._board = board
 
     def display(self):
         print(self._board)
@@ -42,13 +45,13 @@ class Game:
         succesful = False
         prev_board = self.board.copy()
         if direction == 0:
-            succesful = self.moveVertical(1) 
+            succesful, combined_values = self.moveVertical(1) 
         elif direction == 1:
-            succesful = self.moveVertical(-1)
+            succesful, combined_values = self.moveVertical(-1)
         elif direction == 2:
-            succesful = self.moveHorizontal(-1)
+            succesful, combined_values = self.moveHorizontal(-1)
         elif direction == 3:
-            succesful = self.moveHorizontal(1)
+            succesful, combined_values = self.moveHorizontal(1)
         else:
             raise Exception("invalid input")
 
@@ -56,12 +59,13 @@ class Game:
         
         if succesful:
             self.gen_values()
-            return True
-        return False
+        return (succesful, combined_values)
+    
 
     def moveVertical(self, direction):
         """1 for up, -1 for down"""
         # Do column first to go down the column
+        combined_values = []
         success = False
         for c in range(4):
             prev_empty = []
@@ -74,6 +78,7 @@ class Game:
 
                 if last_value and self._board[last_value[0]][last_value[1]] == self._board[r][c]:
                     self._board[last_value[0]][last_value[1]] *= 2
+                    combined_values.append(self._board[last_value[0]][last_value[1]])
                     self._board[r][c] = 0
                     last_value = None
 
@@ -90,11 +95,12 @@ class Game:
                 last_value = empty_cell
                 self._board[r][c] = 0
                 prev_empty.append((r, c))
-        return success
+        return (success, combined_values)
 
     def moveHorizontal(self, direction):
         """1 for left, -1 for right"""
         # Do column first to go down the column
+        combined_values = []
         success = False
         for r in range(4):
             prev_empty = []
@@ -107,6 +113,7 @@ class Game:
 
                 if last_value and self._board[last_value[0]][last_value[1]] == self._board[r][c]:
                     self._board[last_value[0]][last_value[1]] *= 2
+                    combined_values.append(self._board[last_value[0]][last_value[1]])
                     self._board[r][c] = 0
                     last_value = None
 
@@ -121,7 +128,7 @@ class Game:
                 last_value = empty_cell
                 self._board[r][c] = 0
                 prev_empty.append((r, c))
-        return success
+        return (success, combined_values)
 
     @property
     def board(self):
