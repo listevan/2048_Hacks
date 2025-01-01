@@ -66,6 +66,7 @@ class Game:
         """1 for up, -1 for down"""
         # Do column first to go down the column
         combined_values = []
+        combined_indexes = []
         success = False
         for c in range(4):
             prev_empty = []
@@ -79,6 +80,8 @@ class Game:
                 if last_value and self._board[last_value[0]][last_value[1]] == self._board[r][c]:
                     self._board[last_value[0]][last_value[1]] *= 2
                     combined_values.append(self._board[last_value[0]][last_value[1]])
+                    combined_indexes.append(last_value)
+                    combined_indexes.append((r,c))
                     self._board[r][c] = 0
                     last_value = None
 
@@ -101,6 +104,7 @@ class Game:
         """1 for left, -1 for right"""
         # Do column first to go down the column
         combined_values = []
+        combined_indexes = []
         success = False
         for r in range(4):
             prev_empty = []
@@ -114,6 +118,8 @@ class Game:
                 if last_value and self._board[last_value[0]][last_value[1]] == self._board[r][c]:
                     self._board[last_value[0]][last_value[1]] *= 2
                     combined_values.append(self._board[last_value[0]][last_value[1]])
+                    combined_indexes.append(last_value)
+                    combined_indexes.append((r, c))
                     self._board[r][c] = 0
                     last_value = None
 
