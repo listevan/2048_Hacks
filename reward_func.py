@@ -48,4 +48,4 @@ def get_reward(prev, dir, next, terminated, truncated, successful, combined_valu
     if not reward:
         reward = -4
 
-    return reward # maybe also include created oppurtunities
+    return reward / 4096.0 # maybe also include created oppurtunities
