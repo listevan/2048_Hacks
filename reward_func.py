@@ -17,7 +17,6 @@ def get_reward(prev, dir, next, terminated, truncated, successful, combined_valu
     # did it move two things that could have been combined apart
 
     used_indexes = set([x for index_pair in combined_indexes for x in index_pair])
-    print(used_indexes)
     
     # if next value wins or loses the game
     if terminated: # won
@@ -36,13 +35,11 @@ def get_reward(prev, dir, next, terminated, truncated, successful, combined_valu
             continue
         # if i == dir:
         #     continue
-        print(i)
         temp_game = Game()
         temp_game.from_board(prev.copy())
         temp_success, temp_combined_values, temp_combined_indexes = temp_game.move(i)
         
         for index_pair in temp_combined_indexes:
-            print(index_pair)
             if index_pair[0] in used_indexes or index_pair[1] in used_indexes:
                 reward += prev[index_pair[0][0], index_pair[0][1]] * 2 # getting rid of duplicate values
 
