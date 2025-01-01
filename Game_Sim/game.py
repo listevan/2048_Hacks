@@ -51,10 +51,12 @@ class Game:
         elif direction == 2:
             self._board = self._board.T
             succesful, combined_values, combined_indexes = self.moveVertical(-1)
+            combined_indexes = [((index_pair[0][1], index_pair[0][0]), (index_pair[1][1], index_pair[1][0])) for index_pair in combined_indexes]
             self._board = self._board.T
         elif direction == 3:
             self._board = self._board.T
             succesful, combined_values, combined_indexes = self.moveVertical(1)
+            combined_indexes = [((index_pair[0][1], index_pair[0][0]), (index_pair[1][1], index_pair[1][0])) for index_pair in combined_indexes]
             self._board = self._board.T 
         else:
             raise Exception("invalid input")

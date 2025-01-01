@@ -31,16 +31,18 @@ def get_reward(prev, dir, next, terminated, truncated, successful, combined_valu
     
     reward = sum(combined_values)
 
-    for i in range(3): # techinically only needs to check one value because up and down will combine the same value, normally 4
-        if i < 2 == dir < 2:
+    for i in range(1, 3, 1): # techinically only needs to check one value because up and down will combine the same value, normally 4
+        if (i < 2) == (dir < 2):
             continue
         # if i == dir:
         #     continue
+        print(i)
         temp_game = Game()
         temp_game.from_board(prev.copy())
         temp_success, temp_combined_values, temp_combined_indexes = temp_game.move(i)
         
         for index_pair in temp_combined_indexes:
+            print(index_pair)
             if index_pair[0] in used_indexes or index_pair[1] in used_indexes:
                 reward += prev[index_pair[0][0], index_pair[0][1]] * 2 # getting rid of duplicate values
 
