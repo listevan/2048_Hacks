@@ -45,13 +45,17 @@ class Game:
         succesful = False
         prev_board = self.board.copy()
         if direction == 0:
-            succesful, combined_values = self.moveVertical(1) 
+            succesful, combined_values, combined_indexes = self.moveVertical(1) 
         elif direction == 1:
-            succesful, combined_values = self.moveVertical(-1)
+            succesful, combined_values, combined_indexes = self.moveVertical(-1)
         elif direction == 2:
-            succesful, combined_values = self.moveHorizontal(-1)
+            self._board = self._board.T
+            succesful, combined_values, combined_indexes = self.moveVertical(-1)
+            self._board = self._board.T
         elif direction == 3:
-            succesful, combined_values = self.moveHorizontal(1)
+            self._board = self._board.T
+            succesful, combined_values, combined_indexes = self.moveVertical(1)
+            self._board = self._board.T 
         else:
             raise Exception("invalid input")
 
@@ -59,7 +63,7 @@ class Game:
         
         if succesful:
             self.gen_values()
-        return (succesful, combined_values)
+        return (succesful, combined_values, combined_indexes)
     
 
     def moveVertical(self, direction):
@@ -71,6 +75,8 @@ class Game:
         for c in range(4):
             prev_empty = []
             last_value = None
+            last_og_value = None # last original value
+            combined = False
             loop_range = range(4) if direction == 1 else reversed(range(4))
             for r in loop_range:
                 if self._board[r][c] == 0:
@@ -80,15 +86,19 @@ class Game:
                 if last_value and self._board[last_value[0]][last_value[1]] == self._board[r][c]:
                     self._board[last_value[0]][last_value[1]] *= 2
                     combined_values.append(self._board[last_value[0]][last_value[1]])
-                    combined_indexes.append(last_value)
-                    combined_indexes.append((r,c))
+                    combined_indexes.append((last_og_value, (r,c))) 
                     self._board[r][c] = 0
                     last_value = None
+                    last_og_value = None
+                    combined = True
 
                 last_value = (r, c)
-
+                last_og_value = (r, c)
 
                 if len(prev_empty) == 0:
+                    if combined:
+                        prev_empty.append((r, c))
+                        combined = False
                     continue 
                 
                 success = True
@@ -96,45 +106,10 @@ class Game:
 
                 self._board[empty_cell[0]][empty_cell[1]] = self._board[r][c]
                 last_value = empty_cell
+                # no last_og update cuz thats original
                 self._board[r][c] = 0
                 prev_empty.append((r, c))
-        return (success, combined_values)
-
-    def moveHorizontal(self, direction):
-        """1 for left, -1 for right"""
-        # Do column first to go down the column
-        combined_values = []
-        combined_indexes = []
-        success = False
-        for r in range(4):
-            prev_empty = []
-            last_value = None
-            loop_range = range(4) if direction == 1 else reversed(range(4))
-            for c in loop_range:
-                if self._board[r][c] == 0:
-                    prev_empty.append((r, c))
-                    continue
-
-                if last_value and self._board[last_value[0]][last_value[1]] == self._board[r][c]:
-                    self._board[last_value[0]][last_value[1]] *= 2
-                    combined_values.append(self._board[last_value[0]][last_value[1]])
-                    combined_indexes.append(last_value)
-                    combined_indexes.append((r, c))
-                    self._board[r][c] = 0
-                    last_value = None
-
-                last_value = (r, c)
-
-                if len(prev_empty) == 0:
-                    continue 
-                
-                success = True
-                empty_cell = prev_empty.pop(0)
-                self._board[empty_cell[0]][empty_cell[1]] = self._board[r][c]
-                last_value = empty_cell
-                self._board[r][c] = 0
-                prev_empty.append((r, c))
-        return (success, combined_values)
+        return (success, combined_values, combined_indexes)
 
     @property
     def board(self):

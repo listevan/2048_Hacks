@@ -1,7 +1,7 @@
 import numpy as np
 from Game_Sim.game import Game
 
-def get_reward(prev, dir, next, terminated, truncated, successful, combined_values):
+def get_reward(prev, dir, next, terminated, truncated, successful, combined_values, combined_indexes):
     """
         0: up
         1: down
@@ -15,6 +15,9 @@ def get_reward(prev, dir, next, terminated, truncated, successful, combined_valu
     # negative
     # did it do nothing
     # did it move two things that could have been combined apart
+
+    used_indexes = set([x for index_pair in combined_indexes for x in index_pair])
+    print(used_indexes)
     
     # if next value wins or loses the game
     if terminated: # won
@@ -28,13 +31,19 @@ def get_reward(prev, dir, next, terminated, truncated, successful, combined_valu
     
     reward = sum(combined_values)
 
-    for i in range(4):
-        if i == dir:
+    for i in range(3): # techinically only needs to check one value because up and down will combine the same value, normally 4
+        if i < 2 == dir < 2:
             continue
+        # if i == dir:
+        #     continue
         temp_game = Game()
         temp_game.from_board(prev.copy())
-        temp_success, temp_combined_values = temp_game.move(i)
+        temp_success, temp_combined_values, temp_combined_indexes = temp_game.move(i)
         
+        for index_pair in temp_combined_indexes:
+            if index_pair[0] in used_indexes or index_pair[1] in used_indexes:
+                reward += prev[index_pair[0][0], index_pair[0][1]] * 2 # getting rid of duplicate values
+
         reward -= sum(temp_combined_values)
 
     if not reward:
