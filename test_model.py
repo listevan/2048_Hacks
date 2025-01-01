@@ -21,9 +21,9 @@ def test_model(filename):
         print(output)
         action = torch.argmax(output).item()
         print('action: ', action)
-        new_game.move(action)
+        successful, combined_values = new_game.move(action)
 
-        print('reward: ', get_reward(prev, new_game.board.copy(), new_game.check_win(), new_game.check_loss()))
+        print('reward: ', get_reward(prev, action, new_game.board.copy(), new_game.check_win(), new_game.check_loss(), successful, combined_values))
         next = input()
         if next == "close":
             break
