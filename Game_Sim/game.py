@@ -116,7 +116,7 @@ class Game:
     @property
     def board(self):
         """Returns the current state of the board."""
-        return self._board
+        return self._board.copy() / 2048.0
 
     def check_loss(self) -> bool:
         """Returns True if there's no moves to be made, False otherwise."""
