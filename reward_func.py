@@ -15,7 +15,7 @@ def get_reward(prev, dir, next, terminated, truncated, successful, combined_valu
     # negative
     # did it do nothing
     # did it move two things that could have been combined apart
-    return successful
+    return (successful * 2) - 1
 
     used_indexes = set([x for index_pair in combined_indexes for x in index_pair])
     
