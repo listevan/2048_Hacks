@@ -8,13 +8,22 @@
 import numpy as np
 
 class Game:
-    def __init__(self):
+    def __init__(self, multidimensional=False):
         self._board = np.zeros([4, 4])
         self.gen_values()
         self.gen_values()
+        self.multidimensional = multidimensional
     
-    def from_board(self, board):
-        self._board = board
+    def from_board(self, board, multidimensional=False):
+        if not multidimensional:
+            self._board = board
+        else:
+            self._board = np.zeros((4, 4))
+            for i in range(4):
+                for j in range(4):
+                    for k in range(11):
+                        if board[k, i, j]:
+                            self._board[i, j] = 2**k
 
     def display(self):
         print(self._board)
@@ -116,7 +125,19 @@ class Game:
     @property
     def board(self):
         """Returns the current state of the board."""
-        return self._board.copy() / 2048.0
+        if not self.multidimensional:
+            return self._board.copy()
+        else: # return 11x4x4, first axis represents value where ith layer is 2^i
+            answer = np.zeros((11, 4, 4))
+            for i in range(4):
+                for j in range (4):
+                    if not self._board[i, j]:
+                        ind = 0
+                    else:
+                        ind = int(np.log(self._board[i, j]))
+                    answer[ind, i, j] = 1
+            return answer
+
 
     def check_loss(self) -> bool:
         """Returns True if there's no moves to be made, False otherwise."""
