@@ -14,11 +14,10 @@ def select_action(state, model, steps_done, EPS_START=.9, EPS_END=.05, EPS_DECAY
     steps_done += 1
     if sample > eps_threshold:
         with torch.no_grad():
-            # t.max(1) will return the largest column value of each row.
-            # second column on max result is index of where max element was
-            # found, so we pick action with the larger expected reward.
             # input = torch.tensor(state.flatten(), dtype=torch.float32, device=device).unsqueeze(0) # nn
-            input = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0) # cnn
+            # input = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0) # cnn
+            input = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0).unsqueeze(0) # 3d cnn
+
             output = torch.argsort(model(input).detach().cpu()).squeeze() # normally is selected via policy_net
             for action in output:
                 g = Game()

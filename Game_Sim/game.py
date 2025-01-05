@@ -28,6 +28,9 @@ class Game:
     def display(self):
         print(self._board)
 
+    def max(self):
+        return self._board.max()
+
     def gen_values(self):
         """Generates one value"""
         emptys = self.get_empty_cells()
