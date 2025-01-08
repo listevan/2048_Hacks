@@ -10,14 +10,14 @@ from reward_func import get_reward
 from Game_Sim.game import Game
 
 def test_model(filename):
-    model = DQN(11)
+    model = DQNex(1)
     model.load_state_dict(torch.load(filename, map_location=torch.device('cpu')))
 
     new_game = Game(multidimensional=True)
     while (not new_game.check_loss() and not new_game.check_win()):
         new_game.display()
         backup = new_game.board.copy()
-        prev = np.expand_dims(backup, 0)
+        prev = np.expand_dims(np.expand_dims(backup, 0), 0)
 
         action = select_action(prev, model).squeeze()
         print('action: ', action)
@@ -43,10 +43,8 @@ def select_action(state, model): # different from the one in the file, this is f
         for action in output:
             game = Game()
             game.from_board(state[g, :, :, :].squeeze(), multidimensional=True)
-            game.display()
             success, _, _ = game.move(action)
             
-            print(action, success)
             if not success:
                 continue
             else:
@@ -103,7 +101,7 @@ def compare_model(base_cnn_filename, ex_cnn_filename, num_games=128, batch_size=
 
                 if won or lost:
                     finished_games.add(i*batch_size+j)
-                    high_scores[i*batch_size+j] = states[j, :, :, :, :].max()
+                    high_scores[i*batch_size+j] = states[j, :, :, :].max()
 
 
             # updates states2
@@ -153,8 +151,8 @@ def compare_model(base_cnn_filename, ex_cnn_filename, num_games=128, batch_size=
     print("model2: ", score_dict2.tolist()) 
 
 if __name__ == "__main__":
-    args = sys.argv
-    test_model(args[1])
+    # args = sys.argv
+    # test_model(args[1])
 
-    # compare_model('Model/saved_models/final2dpolicy_net.pt', 'Model/saved_models/final3dpolicy_net.pt')
+    compare_model('Model/saved_models/2dpolicy_net.pt', 'Model/saved_models/3dpolicy_net.pt')
 
