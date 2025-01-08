@@ -1,0 +1,200 @@
+"""
+    Rules:
+       starts with two values (only twos (%) and fours (%) can spawn)
+       each time a player moves the pieces a two (%) or a four (%) spawn
+       moving pieces adds two consecutive same values in that row (when player moves left or right) or column (when player moves up or down) (if three values which combine)
+"""
+
+import numpy as np
+import random
+
+class Game:
+    def __init__(self, multidimensional=False):
+        self._board = np.zeros([4, 4])
+        self.gen_values()
+        self.gen_values()
+        self.multidimensional = multidimensional
+    
+    def from_board(self, board, multidimensional=False):
+        if not multidimensional:
+            self._board = board
+        else:
+            self._board = np.zeros((4, 4))
+            for i in range(4):
+                for j in range(4):
+                    for k in range(11):
+                        if board[k, i, j]:
+                            self._board[i, j] = 2**(k+1)
+
+    def display(self):
+        print(self._board)
+
+    def max(self):
+        return self._board.max()
+
+    def gen_values(self):
+        """Generates one value"""
+        emptys = self.get_empty_cells()
+        if (not len(emptys)):
+            return
+        chosen = np.random.choice(emptys, size=1, replace=False)
+        i1 = chosen[0] // 4
+        j1 = chosen[0] % 4
+        # i2 = chosen[1] // 4
+        # j2 = chosen[1] % 4
+        # print("gen'd at", i1, j1)
+        sample = random.random()
+        generated_value = 4 if sample <= .1 else 2
+        self._board[i1][j1] = generated_value
+        # self._board[i2][j2] = np.random.choice([2, 4], size=1)[0]
+
+    def move(self, direction):
+        """
+            0: up
+            1: down
+            2: right
+            3: left
+        """
+
+        # do movement, generate value
+        succesful = False
+        prev_board = self.board.copy()
+        if direction == 0:
+            succesful, combined_values, combined_indexes = self.moveVertical(1) 
+        elif direction == 1:
+            succesful, combined_values, combined_indexes = self.moveVertical(-1)
+        elif direction == 2:
+            self._board = self._board.T
+            succesful, combined_values, combined_indexes = self.moveVertical(-1)
+            combined_indexes = [((index_pair[0][1], index_pair[0][0]), (index_pair[1][1], index_pair[1][0])) for index_pair in combined_indexes]
+            self._board = self._board.T
+        elif direction == 3:
+            self._board = self._board.T
+            succesful, combined_values, combined_indexes = self.moveVertical(1)
+            combined_indexes = [((index_pair[0][1], index_pair[0][0]), (index_pair[1][1], index_pair[1][0])) for index_pair in combined_indexes]
+            self._board = self._board.T 
+        else:
+            raise Exception("invalid input")
+
+        # self.display()
+        
+        if succesful:
+            self.gen_values()
+        return (succesful, combined_values, combined_indexes)
+    
+
+    def moveVertical(self, direction):
+        """1 for up, -1 for down"""
+        # Do column first to go down the column
+        combined_values = []
+        combined_indexes = []
+        success = False
+        for c in range(4):
+            prev_empty = []
+            last_value = None
+            last_og_value = None # last original value
+            combined = False
+            loop_range = range(4) if direction == 1 else reversed(range(4))
+            for r in loop_range:
+                if self._board[r][c] == 0:
+                    prev_empty.append((r, c))
+                    continue
+
+                if last_value and self._board[last_value[0]][last_value[1]] == self._board[r][c]:
+                    self._board[last_value[0]][last_value[1]] *= 2
+                    combined_values.append(self._board[last_value[0]][last_value[1]])
+                    combined_indexes.append((last_og_value, (r,c))) 
+                    self._board[r][c] = 0
+                    last_value = None
+                    last_og_value = None
+                    combined = True
+
+                last_value = (r, c)
+                last_og_value = (r, c)
+
+                if len(prev_empty) == 0:
+                    if combined:
+                        prev_empty.append((r, c))
+                        combined = False
+                    continue 
+                
+                success = True
+                empty_cell = prev_empty.pop(0)
+
+                self._board[empty_cell[0]][empty_cell[1]] = self._board[r][c]
+                last_value = empty_cell
+                # no last_og update cuz thats original
+                self._board[r][c] = 0
+                prev_empty.append((r, c))
+        return (success, combined_values, combined_indexes)
+
+    @property
+    def board(self):
+        """Returns the current state of the board."""
+        if not self.multidimensional:
+            return self._board.copy()
+        else: # return 11x4x4, first axis represents value where ith layer is 2^i
+            answer = np.zeros((11, 4, 4))
+            for i in range(4):
+                for j in range (4):
+                    if self._board[i, j]:
+                        ind = int(np.log2(self._board[i, j])) - 1
+                        answer[ind, i, j] = 1
+            return answer
+
+
+    def check_loss(self) -> bool:
+        """Returns True if there's no moves to be made, False otherwise."""
+        for i in range(4):
+            for j in range(4):
+                # if there is empty space it is fine
+                if self._board[i][j] == 0:
+                    return False
+
+                left = (i, j-1)
+                right = (i, j+1)
+                up = (i-1, j)
+                down = (i+1, j)
+
+                if self._in_bounds(*left):
+                    if self._board[i][j] == self._board[left[0]][left[1]]:
+                        return False
+                if self._in_bounds(*right):
+                    if self._board[i][j] == self._board[right[0]][right[1]]:
+                        return False
+                if self._in_bounds(*up):
+                    if self._board[i][j] == self._board[up[0]][up[1]]:
+                        return False
+                if self._in_bounds(*down):
+                    if self._board[i][j] == self._board[down[0]][down[1]]:
+                        return False
+        return True
+
+    def _in_bounds(self, r, c):
+        return (r >= 0 and c >= 0) and (r <= 3 and c <= 3)
+
+    def check_win(self) -> bool:
+        """Returns True if there's a 2048 value in the board, False otherwise."""
+        for i in range(4):
+            for j in range(4):
+                if self._board[i][j] == 2048:
+                    return True
+        return False
+
+    def get_occupied_cells(self):
+        """Returns a list of occupied cells as tuples"""
+        res = []
+        for i in range(4):
+            for j in range(4):
+                if self._board[i][j] != 0:
+                    res.append((i, j))
+        return res
+
+    def get_empty_cells(self):
+        """Returns a list of the empty cells."""
+        res = [] 
+        for i in range(4):
+            for j in range(4):
+                if self._board[i][j] == 0:
+                    res.append(i * 4 + j)
+        return res
