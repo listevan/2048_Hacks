@@ -29,4 +29,4 @@ def select_action(state, model, steps_done, EPS_START=.9, EPS_END=.05, EPS_DECAY
                     return action, steps_done
             return np.random.choice(4), steps_done # no available moves left
     else:
-        return np.random.choice(4), steps_done
+        return np.random.choice(4), steps_done 

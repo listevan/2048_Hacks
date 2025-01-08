@@ -23,7 +23,7 @@ class Game:
                 for j in range(4):
                     for k in range(11):
                         if board[k, i, j]:
-                            self._board[i, j] = 2**k
+                            self._board[i, j] = 2**(k+1)
 
     def display(self):
         print(self._board)
@@ -134,11 +134,9 @@ class Game:
             answer = np.zeros((11, 4, 4))
             for i in range(4):
                 for j in range (4):
-                    if not self._board[i, j]:
-                        ind = 0
-                    else:
-                        ind = int(np.log(self._board[i, j]))
-                    answer[ind, i, j] = 1
+                    if self._board[i, j]:
+                        ind = int(np.log2(self._board[i, j])) - 1
+                        answer[ind, i, j] = 1
             return answer
 
 
