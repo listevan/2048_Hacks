@@ -6,6 +6,7 @@
 """
 
 import numpy as np
+import random
 
 class Game:
     def __init__(self, multidimensional=False):
@@ -42,7 +43,9 @@ class Game:
         # i2 = chosen[1] // 4
         # j2 = chosen[1] % 4
         # print("gen'd at", i1, j1)
-        self._board[i1][j1] = np.random.choice([2, 4], size=1)[0]
+        sample = random.random()
+        generated_value = 4 if sample <= .1 else 2
+        self._board[i1][j1] = generated_value
         # self._board[i2][j2] = np.random.choice([2, 4], size=1)[0]
 
     def move(self, direction):
