@@ -55,6 +55,15 @@ def select_action(state, model): # different from the one in the file, this is f
     
     return final_actions
 
+def max_value(game_board):
+    game_board = game_board.copy().squeeze()
+    # shape is 11 x 4 x 4
+    for i in range(game_board.shape[0]-1, -1, -1):
+        if (game_board[i, :, :] == 1).any():
+            return 2**(i+1)
+        
+    return 0
+
 def compare_model(base_cnn_filename, ex_cnn_filename, num_games=128, batch_size=128):
     if num_games % batch_size:
         raise Exception("invalid batch_size or num_games")
@@ -101,7 +110,7 @@ def compare_model(base_cnn_filename, ex_cnn_filename, num_games=128, batch_size=
 
                 if won or lost:
                     finished_games.add(i*batch_size+j)
-                    high_scores[i*batch_size+j] = states[j, :, :, :].max()
+                    high_scores[i*batch_size+j] = max_value(states[j, :, :, :])
 
 
             # updates states2
@@ -118,7 +127,7 @@ def compare_model(base_cnn_filename, ex_cnn_filename, num_games=128, batch_size=
 
                 if won or lost:
                     finished_games2.add(i*batch_size+j)
-                    high_scores2[i*batch_size+j] = states2[j, :, :, :, :].max()
+                    high_scores2[i*batch_size+j] = max_value(states2[j, :, :, :, :])
 
             print("iter: {}, finished games: model1 = {}, model2 = {}".format(t, len(finished_games), len(finished_games2)), end='\r')
             nonlostgame = (len(finished_games) + len(finished_games2)) == 2 * (i+1) * batch_size
@@ -137,7 +146,7 @@ def compare_model(base_cnn_filename, ex_cnn_filename, num_games=128, batch_size=
     print("model1: {}, model2: {}".format(high_scores.max(), high_scores2.max()))
     # min
     print("min:")
-    print("model1: {}, model2: {}".format(high_scores.min(), high_scores.max()))
+    print("model1: {}, model2: {}".format(high_scores.min(), high_scores.min()))
     # % at each value
     score_dict = np.zeros((11))
     score_dict2 = np.zeros((11))
