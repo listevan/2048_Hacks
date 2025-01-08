@@ -15,8 +15,8 @@ def select_action(state, model, steps_done, EPS_START=.9, EPS_END=.05, EPS_DECAY
     if sample > eps_threshold:
         with torch.no_grad():
             # input = torch.tensor(state.flatten(), dtype=torch.float32, device=device).unsqueeze(0) # nn
-            # input = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0) # cnn
-            input = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0).unsqueeze(0) # 3d cnn
+            input = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0) # cnn
+            # input = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0).unsqueeze(0) # 3d cnn
 
             output = torch.argsort(model(input).detach().cpu()).squeeze() # normally is selected via policy_net
             for action in output:
