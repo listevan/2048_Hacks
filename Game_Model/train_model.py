@@ -34,7 +34,7 @@ config = configparser.ConfigParser()
 config.read('config.ini')
 
 # Access values from the configuration file
-EX_MODEL = config.getboolean('Params', 'EX_MODEL')
+EX_MODEL = bool(input("Train 2D CNN Model (0) or 3D CNN Model (1)"))
 BATCH_SIZE = config.getint('Params', 'BATCH_SIZE')
 GAMMA = config.getfloat('Params', 'GAMMA')
 EPS_START = config.getfloat('Params', 'EPS_START')
