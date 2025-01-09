@@ -124,7 +124,7 @@ def optimize_model():
     optimizer.zero_grad()
     loss.backward()
     # # In-place gradient clipping
-    torch.nn.utils.clip_grad_value_(policy_net.parameters(), 10) # normal clipping was 100
+    torch.nn.utils.clip_grad_value_(policy_net.parameters(), 100) # normal clipping was 100
     optimizer.step()
 
     return loss.item()
