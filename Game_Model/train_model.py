@@ -42,6 +42,7 @@ EPS_END = config.getfloat('PARAMS', 'EPS_END')
 EPS_DECAY = config.getfloat('PARAMS', 'EPS_DECAY')
 LR = config.getfloat('PARAMS', 'LR')
 TARGET_Q = config.getint('PARAMS', 'TARGET_Q')
+num_episodes = config.getint('PARAMS', 'num_episodes') # epochs
 
 """
     ReplayMemory this keeps track of preiovus moves for training and is used to train ght emodel
@@ -128,9 +129,6 @@ def optimize_model():
     optimizer.step()
 
     return loss.item()
-
-
-num_episodes = 500 # epochs
 
 model_loss = []
 
