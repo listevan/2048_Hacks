@@ -9,15 +9,20 @@ from reward_func import get_reward
 
 from Game_Sim.game import Game
 
-def test_model(filename):
-    model = DQNex(1)
+def test_model(filename, EX_MODEL=False):
+    if not EX_MODEL: # 2D CNN
+        model = DQN(11)
+    else: #3D CNN
+        model = DQNex(1)
     model.load_state_dict(torch.load(filename, map_location=torch.device('cpu')))
 
     new_game = Game(multidimensional=True)
     while (not new_game.check_loss() and not new_game.check_win()):
         new_game.display()
         backup = new_game.board.copy()
-        prev = np.expand_dims(np.expand_dims(backup, 0), 0)
+        prev = np.expand_dims(backup, 0)
+        if EX_MODEL:
+            prev = np.expand_dims(prev, 0)
 
         action = select_action(prev, model).squeeze()
         print('action: ', action)
@@ -162,8 +167,19 @@ def compare_model(base_cnn_filename, ex_cnn_filename, num_games=128, batch_size=
     print("model2: ", score_dict2.tolist()) 
 
 if __name__ == "__main__":
-    # args = sys.argv
-    # test_model(args[1])
-
-    compare_model('Model/saved_models/2dpolicy_net.pt', 'Model/saved_models/3dpolicy_net.pt')
+    x = input('What would you like to do: \n1. test singular model\n2. compare two models\n')
+    if int(x) == 1:
+        x = input('Would you like to test a 2D CNN (1) or a 3D CNN (2)?\n')
+        if int(x) == 1:
+            x = input('Enter path of model (2D CNN): ')
+            test_model(x, EX_MODEL=False)
+        if int(x) == 2:
+            y = input('Enter path of 2nd model (3D CNN): ')
+            test_model(y, EX_MODEL=True)
+    elif int(x) == 2:
+        x = input('Enter path of 1st model (2D CNN): ')
+        y = input('Enter path of 2nd model (3D CNN): ')
+        compare_model(x, y)
+    elif int(x) == 3: # for developer use in debugging ts
+        compare_model('Model/saved_models/2dpolicy_net.pt', 'Model/saved_models/3dpolicy_net.pt') 
 
