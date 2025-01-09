@@ -31,17 +31,17 @@ print(device)
 config = configparser.ConfigParser()
 
 # Read the configuration file
-config.read('config.ini')
+config.read('Game_Model/config.ini')
 
 # Access values from the configuration file
-EX_MODEL = bool(input("Train 2D CNN Model (0) or 3D CNN Model (1)"))
-BATCH_SIZE = config.getint('Params', 'BATCH_SIZE')
-GAMMA = config.getfloat('Params', 'GAMMA')
-EPS_START = config.getfloat('Params', 'EPS_START')
-EPS_END = config.getfloat('Params', 'EPS_END')
-EPS_DECAY = config.getfloat('Params', 'EPS_DECAY')
-LR = config.getfloat('Params', 'LR')
-TARGET_Q = config.getint('Params', 'TARGET_Q')
+EX_MODEL = bool(input("Train 2D CNN Model (0) or 3D CNN Model (1): "))
+BATCH_SIZE = config.getint('PARAMS', 'BATCH_SIZE')
+GAMMA = config.getfloat('PARAMS', 'GAMMA')
+EPS_START = config.getfloat('PARAMS', 'EPS_START')
+EPS_END = config.getfloat('PARAMS', 'EPS_END')
+EPS_DECAY = config.getfloat('PARAMS', 'EPS_DECAY')
+LR = config.getfloat('PARAMS', 'LR')
+TARGET_Q = config.getint('PARAMS', 'TARGET_Q')
 
 """
     ReplayMemory this keeps track of preiovus moves for training and is used to train ght emodel
