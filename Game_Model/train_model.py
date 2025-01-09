@@ -40,7 +40,6 @@ GAMMA = config.getfloat('Params', 'GAMMA')
 EPS_START = config.getfloat('Params', 'EPS_START')
 EPS_END = config.getfloat('Params', 'EPS_END')
 EPS_DECAY = config.getfloat('Params', 'EPS_DECAY')
-TAU = config.getfloat('Params', 'TAU')
 LR = config.getfloat('Params', 'LR')
 TARGET_Q = config.getint('Params', 'TARGET_Q')
 
@@ -150,7 +149,7 @@ for i_episode in range(num_episodes):
     for t in count():
         prev = g.board.copy()
 
-        action, steps_done = select_action(prev, target_net, steps_done, EPS_START, EPS_END, EPS_DECAY, EX_MODEL)
+        action, steps_done = select_action(prev, policy_net, steps_done, EPS_START, EPS_END, EPS_DECAY, EX_MODEL)
         
         # print('move is', action,'type is', type(action), end = "\r")
         success, combined_values, combined_indexes = g.move(action)
@@ -195,7 +194,7 @@ for i_episode in range(num_episodes):
             episode_durations.append(t + 1)
             break
 
-    print('done with epoch #{}, max: '.format(i_episode), g.max(), end='\r')
+    print('done with epoch #{}, max: {}, loss: {}, steps played: {}'.format(i_episode, g.max(), loss, episode_durations[-1]), end='\r')
 
 plt.plot(model_loss)
 plt.show()
