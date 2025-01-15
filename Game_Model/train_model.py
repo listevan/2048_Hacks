@@ -205,8 +205,8 @@ if not EX_MODEL: # 2D CNN
     torch.save(target_net_state_dict, 'Model/saved_models/2dtarget_net.pt')
     torch.save(policy_net_state_dict, 'Model/saved_models/2dpolicy_net.pt')
 else: # 3D CNN
-    torch.save(target_net_state_dict, 'Model/saved_models/2dtarget_net.pt')
-    torch.save(policy_net_state_dict, 'Model/saved_models/2dpolicy_net.pt')
+    torch.save(target_net_state_dict, 'Game_Model/Model/saved_models/2dtarget_net.pt')
+    torch.save(policy_net_state_dict, 'Game_Model/Model/saved_models/2dpolicy_net.pt')
 
 
 

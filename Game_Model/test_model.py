@@ -181,5 +181,5 @@ if __name__ == "__main__":
         y = input('Enter path of 2nd model (3D CNN): ')
         compare_model(x, y)
     elif int(x) == 3: # for developer use in debugging ts
-        compare_model('Model/saved_models/2dpolicy_net.pt', 'Model/saved_models/3dpolicy_net.pt') 
+        compare_model('Game_Model/Model/saved_models/2dpolicy_net.pt', 'Game_Model/Model/saved_models/3dpolicy_net.pt') 
 
