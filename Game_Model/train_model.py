@@ -1,4 +1,3 @@
-
 import matplotlib
 import matplotlib.pyplot as plt
 from tqdm import tqdm
@@ -39,7 +38,7 @@ BATCH_SIZE = config.getint('PARAMS', 'BATCH_SIZE')
 GAMMA = config.getfloat('PARAMS', 'GAMMA')
 EPS_START = config.getfloat('PARAMS', 'EPS_START')
 EPS_END = config.getfloat('PARAMS', 'EPS_END')
-EPS_DECAY = config.getfloat('PARAMS', 'EPS_DECAY')
+EPS_DECAY = config.getint('PARAMS', 'EPS_DECAY')
 LR = config.getfloat('PARAMS', 'LR')
 TARGET_Q = config.getint('PARAMS', 'TARGET_Q')
 num_episodes = config.getint('PARAMS', 'num_episodes') # epochs
@@ -48,7 +47,7 @@ num_episodes = config.getint('PARAMS', 'num_episodes') # epochs
     ReplayMemory this keeps track of preiovus moves for training and is used to train ght emodel
 """
 Transition = namedtuple('Transition',
-                        ('state', 'action', 'next_state', 'reward'))
+                        ('state', 'action', 'reward'))
 
 class ReplayMemory(object):
 
@@ -84,38 +83,30 @@ def optimize_model():
     if len(memory) < BATCH_SIZE:
         return
     transitions = memory.sample(BATCH_SIZE)
-    # Transpose the batch (see https://stackoverflow.com/a/19343/3343043 for
-    # detailed explanation). This converts batch-array of Transitions
-    # to Transition of batch-arrays.
     batch = Transition(*zip(*transitions))
 
-    # Compute a mask of non-final states and concatenate the batch elements
-    # (a final state would've been the one after which simulation ended)
-    non_final_mask = torch.tensor(tuple(map(lambda s: s is not None,
-                                          batch.next_state)), device=device, dtype=torch.bool)
-    non_final_next_states = torch.cat([s for s in batch.next_state
-                                                if s is not None])
-    
-    state_batch = torch.cat(batch.state, dim=0)
-    action_batch = torch.cat(batch.action, dim=0).unsqueeze(1)
-    reward_batch = torch.cat(batch.reward, dim=0)
-    # Compute Q(s_t, a) - the model computes Q(s_t), then we select the
-    # columns of actions taken. These are the actions which would've been taken
-    # for each batch state according to policy_net
-    # outputs 32x4 tensor
-    state_action_values = policy_net(state_batch).gather(0, action_batch)
+    state_batch = np.concatenate(batch.state, axis=0)
+    reward_batch = torch.zeros((BATCH_SIZE, 4))
 
-    # Compute V(s_{t+1}) for all next states.
-    # Expected values of actions for non_final_next_states are computed based
-    # on the "older" target_net; selecting their best reward with max(1).values
-    # This is merged based on the mask, such that we'll have either the expected
-    # state value or 0 in case the state was final.
-    next_state_values = torch.zeros((BATCH_SIZE), device=device)
-    with torch.no_grad():
-        next_state_values[non_final_mask] = target_net(non_final_next_states).max(1).values
-    # Compute the expected Q values
+    next_state_values = torch.zeros((BATCH_SIZE, 4), device=device)
+    
+    for i in range(4): # get the next_state rewards for all possible next states for more state space exploration
+        with torch.no_grad():
+            next_states = torch.zeros((BATCH_SIZE, 1, 11, 4, 4))
+            for j in range(BATCH_SIZE):
+                g = game.Game(multidimensional=True)
+                g.from_board(state_batch[j].squeeze(), multidimensional=True)
+                successful, combined_values, combined_indexes = g.move(i)
+                next_states[i, 0, :, :, :] = torch.tensor(g.board)
+
+                reward_batch[j, i] = get_reward(state_batch[j].squeeze(), i, g.board, g.check_win(), g.check_loss(), successful, combined_values, combined_indexes)
+            
+            next_states = torch.tensor(next_states).to(device)
+            next_state_values[:, i] = target_net(next_states).max(1).values
+
     expected_state_action_values = (next_state_values * GAMMA) + reward_batch
-    # print(state_action_values, expected_state_action_values)
+    
+    state_action_values = policy_net(state)
 
     # Compute MSE loss
     criterion = nn.MSELoss()
@@ -137,7 +128,7 @@ for i_episode in range(num_episodes):
     g = game.Game(multidimensional=True)
     num_episodes_w_no_movement = 0
 
-    state = g.board.copy()
+    state = g.board
     # state = torch.tensor(state.flatten(), dtype=torch.float32, device=device).unsqueeze(0) # nn
     if not EX_MODEL:
         state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0) # cnn
@@ -145,14 +136,14 @@ for i_episode in range(num_episodes):
         state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0).unsqueeze(0) # 3d cnn
 
     for t in count():
-        prev = g.board.copy()
+        prev = g.board
 
         action, steps_done = select_action(prev, policy_net, steps_done, EPS_START, EPS_END, EPS_DECAY, EX_MODEL)
         
         # print('move is', action,'type is', type(action), end = "\r")
         success, combined_values, combined_indexes = g.move(action)
         action = torch.tensor([action], dtype=torch.int64, device=device)
-        observation = g.board.copy()
+        observation = g.board
         
         terminated = g.check_win()
         truncated = g.check_loss()
@@ -173,7 +164,7 @@ for i_episode in range(num_episodes):
                 next_state = torch.tensor(observation, dtype=torch.float32, device=device).unsqueeze(0).unsqueeze(0) # 3d cnn
 
         # Store the transition in memory
-        memory.push(state, action, next_state, reward)
+        memory.push(np.expand_dims(np.expand_dims(prev, axis = 0), axis = 0), action, reward)
 
         # Move to the next state
         state = next_state
