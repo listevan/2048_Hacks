@@ -24,5 +24,5 @@ def get_reward(
     prev_game.from_board(prev, multidimensional=True)
     next_game = Game()
     next_game.from_board(next, multidimensional=True)
-    print("prev_max is {}, next_max is {}".format(prev_game.max(), next_game.max()))
-    return (next_game.max() > prev_game.max()) * next_game.max()
+    # print("prev_max is {}, next_max is {}".format(prev_game.max(), next_game.max()))
+    return (next_game.max() > prev_game.max()) * 1 # to conver to int

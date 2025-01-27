@@ -84,7 +84,7 @@ def optimize_model():
     batch = Transition(*zip(*transitions))
 
     state_batch = np.concatenate(batch.state, axis=0)
-    reward_batch = torch.zeros((BATCH_SIZE, 4))
+    reward_batch = torch.zeros((BATCH_SIZE, 4), device = device)
 
     next_state_values = torch.zeros((BATCH_SIZE, 4), device=device)
 
@@ -92,20 +92,20 @@ def optimize_model():
         with torch.no_grad():
             next_states = torch.zeros((BATCH_SIZE, 1, 11, 4, 4))
             for j in range(BATCH_SIZE):
-                g = game.Game(multidimensional=True)
-                g.from_board(state_batch[j].squeeze(), multidimensional=True)
-                successful, combined_values, combined_indexes = g.move(i)
+                temp_g = game.Game(multidimensional=True)
+                temp_g.from_board(state_batch[j].squeeze(), multidimensional=True)
+                successful, c_v, c_i = temp_g.move(i)
                 next_states[i, 0, :, :, :] = torch.tensor(g.board)
 
                 reward_batch[j, i] = get_reward(
                     state_batch[j].squeeze(),
                     i,
-                    g.board,
-                    g.check_win(),
-                    g.check_loss(),
+                    temp_g.board,
+                    temp_g.check_win(),
+                    temp_g.check_loss(),
                     successful,
-                    combined_values,
-                    combined_indexes,
+                    c_v,
+                    c_i,
                 )
 
             next_states = torch.tensor(next_states).to(device)
@@ -126,19 +126,28 @@ def optimize_model():
     loss.backward()
     # # In-place gradient clipping
     torch.nn.utils.clip_grad_value_(
-        policy_net.parameters(), 100
+        policy_net.parameters(), 1
     )  # normal clipping was 100
     optimizer.step()
 
     return loss.item()
 
-
 model_loss = []
+
+plt.ion()  # Turn on interactive mode
+fig, ax = plt.subplots()
+line, = ax.plot([], [], 'b-', label='Loss')
+ax.set_xlim(0, 10)  # Initial x-axis range
+ax.set_ylim(0, 2)   # Initial y-axis range (adjust as needed)
+ax.set_xlabel('Iteration')
+ax.set_ylabel('Loss')
+ax.set_title('Training Loss')
+ax.legend()
+plt.grid()
 
 for i_episode in range(num_episodes):
     # Initialize the environment and get its state
     g = game.Game(multidimensional=True)
-    num_episodes_w_no_movement = 0
 
     state = g.board
     # state = torch.tensor(state.flatten(), dtype=torch.float32, device=device).unsqueeze(0) # nn
@@ -211,8 +220,16 @@ for i_episode in range(num_episodes):
         state = next_state
 
         # Perform one step of the optimization (on the policy network)
-        loss = optimize_model()
-        model_loss.append(loss)
+        m_loss = optimize_model()
+        if m_loss is not None:
+            model_loss.append(m_loss)
+        
+            line.set_ydata(model_loss)
+            line.set_xdata(range(len(model_loss)))
+            ax.set_xlim(0, len(model_loss))
+            ax.set_ylim(0, max(model_loss) + 0.1)
+            plt.draw()
+            plt.pause(.1)
 
         # Soft update of the target network's weights
         if steps_done % TARGET_Q == 0:
@@ -223,13 +240,12 @@ for i_episode in range(num_episodes):
         if done:
             episode_durations.append(t + 1)
             break
-
     print(
-        "done with epoch #{}, max: {}, loss: {}, steps played: {}".format(
-            i_episode, g.max(), loss, episode_durations[-1]
+        "[done with epoch #{}, max: {}, loss: {}, steps played: {}]".format(
+            i_episode, g.max(), m_loss, episode_durations[-1]
         ),
         end="\r",
-    )
+    ) 
 
 plt.plot(model_loss)
 plt.show()
