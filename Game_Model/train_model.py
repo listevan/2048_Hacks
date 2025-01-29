@@ -40,6 +40,16 @@ LR = config.getfloat("PARAMS", "LR")
 TARGET_Q = config.getint("PARAMS", "TARGET_Q")
 num_episodes = config.getint("PARAMS", "num_episodes")  # epochs
 
+
+def track_total_gradient_norm(model):
+    """Compute the total L2 norm of gradients across all model parameters."""
+    total_norm = 0.0
+    for param in model.parameters():
+        if param.grad is not None:
+            total_norm += param.grad.norm().item() ** 2
+    return total_norm**0.5  # Square root to get L2 norm
+
+
 """
     ReplayMemory this keeps track of preiovus moves for training and is used to train ght emodel
 """
@@ -84,7 +94,7 @@ def optimize_model():
     batch = Transition(*zip(*transitions))
 
     state_batch = np.concatenate(batch.state, axis=0)
-    reward_batch = torch.zeros((BATCH_SIZE, 4), device = device)
+    reward_batch = torch.zeros((BATCH_SIZE, 4), device=device)
 
     next_state_values = torch.zeros((BATCH_SIZE, 4), device=device)
 
@@ -132,24 +142,34 @@ def optimize_model():
 
     return loss.item()
 
+
 model_loss = []
 model_scores = []
+model_gradients = []
 
 plt.ion()  # Turn on interactive mode
-fig, ax = plt.subplots((2))
-line, = ax[0].plot([], [], 'b-', label='Loss')
+fig, ax = plt.subplots((3))
+
+(line,) = ax[0].plot([], [], "b-", label="Loss")
 ax[0].set_xlim(0, 10)  # Initial x-axis range
-ax[0].set_ylim(0, 2)   # Initial y-axis range (adjust as needed)
-ax[0].set_xlabel('Iteration')
-ax[0].set_ylabel('Loss')
-ax[0].set_title('Training Loss')
+ax[0].set_ylim(0, 2)  # Initial y-axis range (adjust as needed)
+ax[0].set_xlabel("Iteration")
+ax[0].set_ylabel("Loss")
+ax[0].set_title("Training Loss")
 ax[0].legend()
 
-line2, = ax[1].plot([], [], 'b-', label='Max Score')
+(line2,) = ax[1].plot([], [], "b-", label="Max Score")
 ax[1].set_xlim(0, 10)
 ax[1].set_ylim(0, 2)
-ax[1].set_xlabel('Iteration')
-ax[1].set_ylabel('Max Score')
+ax[1].set_xlabel("Iteration")
+ax[1].set_ylabel("Max Score")
+ax[1].legend()
+
+(line3,) = ax[2].plot([], [], "b-", label="Max Score")
+ax[2].set_xlim(0, 10)
+ax[2].set_ylim(0, 2)
+ax[2].set_xlabel("Iteration")
+ax[2].set_ylabel("Gradient")
 ax[1].legend()
 plt.grid()
 
@@ -158,6 +178,9 @@ for i_episode in range(num_episodes):
     g = game.Game(multidimensional=True)
 
     state = g.board
+    average_epoch_loss = []
+    average_epoch_gradient = []
+
     # state = torch.tensor(state.flatten(), dtype=torch.float32, device=device).unsqueeze(0) # nn
     if not EX_MODEL:
         state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(
@@ -230,14 +253,8 @@ for i_episode in range(num_episodes):
         # Perform one step of the optimization (on the policy network)
         m_loss = optimize_model()
         if m_loss is not None:
-            model_loss.append(m_loss)
-        
-            line.set_ydata(model_loss)
-            line.set_xdata(range(len(model_loss)))
-            ax[0].set_xlim(0, len(model_loss))
-            ax[0].set_ylim(0, max(model_loss) + 0.1)
-            plt.draw()
-            plt.pause(.1)
+            average_epoch_loss.append(m_loss)
+        average_epoch_gradient = track_total_gradient_norm(policy_net)
 
         # Soft update of the target network's weights
         if steps_done % TARGET_Q == 0:
@@ -247,11 +264,27 @@ for i_episode in range(num_episodes):
 
         if done:
             episode_durations.append(t + 1)
+            # print(terminated, truncated)
+
+            model_loss.append(sum(average_epoch_loss) / len(average_epoch_loss))
+            line.set_ydata(model_loss)
+            line.set_xdata(range(len(model_loss)))
+            ax[0].set_xlim(0, len(model_loss))
+            ax[0].set_ylim(0, max(model_loss) + 0.1)
+
             model_scores.append(g.max())
             line2.set_ydata(model_scores)
             line2.set_xdata(range(len(model_scores)))
             ax[1].set_xlim(0, len(model_scores))
             ax[1].set_ylim(0, max(model_scores) + 1)
+
+            model_gradients.append(
+                sum(average_epoch_gradient) / len(average_epoch_gradient)
+            )
+            line3.set_ydata(model_gradients)
+            line3.set_xdata(range(len(model_gradients)))
+            ax[2].set_xlim(0, len(model_gradients))
+            ax[2].set_ylim(0, max(model_gradients) + 0.1)
             plt.draw()
             break
     print(
@@ -259,10 +292,8 @@ for i_episode in range(num_episodes):
             i_episode, g.max(), m_loss, episode_durations[-1]
         ),
         end="\r",
-    ) 
-
-plt.plot(model_loss)
-plt.show()
+    )
+plt.ioff()
 
 # saving the models
 target_net_state_dict = target_net.state_dict()
@@ -274,3 +305,14 @@ if not EX_MODEL:  # 2D CNN
 else:  # 3D CNN
     torch.save(target_net_state_dict, "Game_Model/Model/saved_models/2dtarget_net.pt")
     torch.save(policy_net_state_dict, "Game_Model/Model/saved_models/2dpolicy_net.pt")
+
+fig, ax = plt.subplots(3)
+ax[0].plot(model_loss)
+ax[0].set_xlabel("Iteration")
+ax[0].set_xlabel("Loss")
+ax[1].plot(model_scores)
+ax[1].set_xlabel("Iteration")
+ax[1].set_ylabel("Max Scores")
+ax[2].plot(model_gradients)
+ax[2].set_xlabel("Iteration")
+ax[2].set_ylabel("Gradients")
