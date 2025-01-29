@@ -133,16 +133,24 @@ def optimize_model():
     return loss.item()
 
 model_loss = []
+model_scores = []
 
 plt.ion()  # Turn on interactive mode
-fig, ax = plt.subplots()
-line, = ax.plot([], [], 'b-', label='Loss')
-ax.set_xlim(0, 10)  # Initial x-axis range
-ax.set_ylim(0, 2)   # Initial y-axis range (adjust as needed)
-ax.set_xlabel('Iteration')
-ax.set_ylabel('Loss')
-ax.set_title('Training Loss')
-ax.legend()
+fig, ax = plt.subplots((2))
+line, = ax[0].plot([], [], 'b-', label='Loss')
+ax[0].set_xlim(0, 10)  # Initial x-axis range
+ax[0].set_ylim(0, 2)   # Initial y-axis range (adjust as needed)
+ax[0].set_xlabel('Iteration')
+ax[0].set_ylabel('Loss')
+ax[0].set_title('Training Loss')
+ax[0].legend()
+
+line2, = ax[1].plot([], [], 'b-', label='Max Score')
+ax[1].set_xlim(0, 10)
+ax[1].set_ylim(0, 2)
+ax[1].set_xlabel('Iteration')
+ax[1].set_ylabel('Max Score')
+ax[1].legend()
 plt.grid()
 
 for i_episode in range(num_episodes):
@@ -226,8 +234,8 @@ for i_episode in range(num_episodes):
         
             line.set_ydata(model_loss)
             line.set_xdata(range(len(model_loss)))
-            ax.set_xlim(0, len(model_loss))
-            ax.set_ylim(0, max(model_loss) + 0.1)
+            ax[0].set_xlim(0, len(model_loss))
+            ax[0].set_ylim(0, max(model_loss) + 0.1)
             plt.draw()
             plt.pause(.1)
 
@@ -239,6 +247,12 @@ for i_episode in range(num_episodes):
 
         if done:
             episode_durations.append(t + 1)
+            model_scores.append(g.max())
+            line2.set_ydata(model_scores)
+            line2.set_xdata(range(len(model_scores)))
+            ax[1].set_xlim(0, len(model_scores))
+            ax[1].set_ylim(0, max(model_scores) + 1)
+            plt.draw()
             break
     print(
         "[done with epoch #{}, max: {}, loss: {}, steps played: {}]".format(
