@@ -295,6 +295,8 @@ for i_episode in range(num_episodes):
     )
 plt.ioff()
 
+plt.show()
+
 # saving the models
 target_net_state_dict = target_net.state_dict()
 policy_net_state_dict = policy_net.state_dict()
@@ -305,14 +307,3 @@ if not EX_MODEL:  # 2D CNN
 else:  # 3D CNN
     torch.save(target_net_state_dict, "Game_Model/Model/saved_models/2dtarget_net.pt")
     torch.save(policy_net_state_dict, "Game_Model/Model/saved_models/2dpolicy_net.pt")
-
-fig, ax = plt.subplots(3)
-ax[0].plot(model_loss)
-ax[0].set_xlabel("Iteration")
-ax[0].set_xlabel("Loss")
-ax[1].plot(model_scores)
-ax[1].set_xlabel("Iteration")
-ax[1].set_ylabel("Max Scores")
-ax[2].plot(model_gradients)
-ax[2].set_xlabel("Iteration")
-ax[2].set_ylabel("Gradients")

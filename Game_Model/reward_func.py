@@ -19,10 +19,37 @@ def get_reward(
     3: left
     """
 
-    # return if there is a new record
     prev_game = Game()
     prev_game.from_board(prev, multidimensional=True)
     next_game = Game()
     next_game.from_board(next, multidimensional=True)
-    # print("prev_max is {}, next_max is {}".format(prev_game.max(), next_game.max()))
-    return (next_game.max() > prev_game.max()) * 1 # to conver to int
+    strategy = 0
+    """
+    List of Strategies:
+    Highest number in the corner, start by implementing just for top corner
+    Merging smaller values, may lead to local minima
+    Avoid flat boards
+    """
+
+    max_layer = np.log(next_game.max())
+    if (
+        next_game.board[0, 0, max_layer] or next_game.board[0, 3, max_layer]
+    ):  # max in corner
+        strategy += 0.2
+    for combined_value in combined_values:
+        strategy += (
+            np.log(combined_value) / max_layer
+        )  # reduce the usefulness of values already achieved
+    for i in [2, 3]:
+        temp_next_game = Game()
+        temp_next_game.from_board(next, multidimensional=True)
+        successful, _, _ = temp_next_game.move(i)
+        if not successful:  # if no lateral movement is possible
+            successful -= 1
+
+    if next_game.max() > prev_game.max():
+        return int(max_layer)
+    elif strategy > 0:
+        return strategy
+    else:
+        return -0.1 + strategy
