@@ -254,7 +254,7 @@ for i_episode in range(num_episodes):
         m_loss = optimize_model()
         if m_loss is not None:
             average_epoch_loss.append(m_loss)
-        average_epoch_gradient = track_total_gradient_norm(policy_net)
+        average_epoch_gradient.append(track_total_gradient_norm(policy_net))
 
         # Soft update of the target network's weights
         if steps_done % TARGET_Q == 0:

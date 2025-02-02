@@ -32,8 +32,12 @@ def get_reward(
     """
 
     max_layer = np.log(next_game.max())
-    if (
-        next_game.board[0, 0, max_layer] or next_game.board[0, 3, max_layer]
+    if not (
+        prev_game.board[0, 0] == next_game.max()
+        or prev_game.board[0, 3] == next_game.max()
+    ) and (
+        next_game.board[0, 0] == next_game.max()
+        or next_game.board[0, 3] == next_game.max()
     ):  # max in corner
         strategy += 0.2
     for combined_value in combined_values:
